@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import Header from '../../components/customer/Header';
 import ProductCard from '../../components/customer/ProductCard';
 import { Button } from '../../components/ui/Button';
+import { NavigationMenu, NavigationMenuItem, NavigationMenuLink, NavigationMenuList } from '../../components/ui/navigation-menu';
 
 const ProductsPage = () => {
   const { t } = useTranslation();

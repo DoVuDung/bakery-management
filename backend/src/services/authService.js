@@ -581,6 +581,32 @@ const disableMFA = async (userId, req = null) => {
   return { message: 'MFA disabled successfully' };
 };
 
+// Get user by ID
+const getUserById = async (userId) => {
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: {
+      id: true,
+      phoneNumber: true,
+      email: true,
+      fullName: true,
+      avatar: true,
+      role: true,
+      mfaEnabled: true,
+      mfaMethod: true,
+      isActive: true,
+      createdAt: true,
+      updatedAt: true
+    }
+  });
+
+  if (!user) {
+    throw new Error('User not found');
+  }
+
+  return user;
+};
+
 module.exports = {
   registerUser,
   loginUser,
@@ -591,6 +617,7 @@ module.exports = {
   updateUserProfile,
   enableMFA,
   disableMFA,
+  getUserById,
   isValidVietnamesePhoneNumber,
   generateToken,
   generateRefreshToken,

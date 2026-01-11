@@ -5,7 +5,10 @@ import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/Ca
 import { Badge } from '../../components/ui/Badge';
 import { Button } from '../../components/ui/Button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../components/ui/Tabs';
-import OrderKanban from '../../components/admin/OrderKanban';
+import KanbanBoard from '../../components/admin/KanbanBoard';
+import { ScrollArea } from '../../components/ui/scroll-area';
+import { Avatar, AvatarImage, AvatarFallback } from '../../components/ui/avatar';
+import { Alert, AlertDescription } from '../../components/ui/alert';
 
 const AdminDashboard = () => {
   const { t } = useTranslation();
@@ -184,10 +187,7 @@ const AdminDashboard = () => {
                 <Button>Thêm đơn hàng</Button>
               </div>
               
-              <OrderKanban 
-                orders={orders} 
-                onUpdateStatus={handleUpdateOrderStatus} 
-              />
+              <KanbanBoard />
             </TabsContent>
 
             <TabsContent value="inventory">

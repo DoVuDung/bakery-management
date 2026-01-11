@@ -23,9 +23,17 @@ router.post('/register', async (req, res) => {
 
     // Register user
     const result = await registerUser(req.body, req);
-    res.json(result);
+    
+    // Set secure cookies
+    setSecureCookies(res, result.token, result.refreshToken);
+    
+    res.json({
+      user: result.user,
+      message: 'Registration successful'
+    });
   } catch (err) {
     console.error(err.message);
+    clearAuthCookies(res);
     res.status(500).json({ 
       error: 'Registration failed',
       code: 'REGISTRATION_ERROR'
@@ -62,9 +70,16 @@ router.post('/login', async (req, res) => {
       });
     }
     
-    res.json(result);
+    // Set secure cookies
+    setSecureCookies(res, result.token, result.refreshToken);
+    
+    res.json({
+      user: result.user,
+      message: 'Login successful'
+    });
   } catch (err) {
     console.error(err.message);
+    clearAuthCookies(res);
     res.status(500).json({ 
       error: 'Login failed',
       code: 'LOGIN_ERROR'
@@ -94,9 +109,17 @@ router.post('/social-login', async (req, res) => {
 
     // Social login
     const result = await loginSocial(req.body);
-    res.json(result);
+    
+    // Set secure cookies
+    setSecureCookies(res, result.token, result.refreshToken);
+    
+    res.json({
+      user: result.user,
+      message: 'Social login successful'
+    });
   } catch (err) {
     console.error(err.message);
+    clearAuthCookies(res);
     res.status(500).send('Server error');
   }
 });
@@ -120,9 +143,17 @@ router.post('/verify-mfa', async (req, res) => {
 
     // Verify MFA
     const result = await verifyMFA(userId, otp, req);
-    res.json(result);
+    
+    // Set secure cookies
+    setSecureCookies(res, result.token, result.refreshToken);
+    
+    res.json({
+      user: result.user,
+      message: 'MFA verification successful'
+    });
   } catch (err) {
     console.error(err.message);
+    clearAuthCookies(res);
     res.status(500).json({ 
       error: 'MFA verification failed',
       code: 'MFA_ERROR'
@@ -223,6 +254,32 @@ router.get('/profile', auth, async (req, res) => {
   }
 });
 
+// Helper function to set secure cookies
+const setSecureCookies = (res, token, refreshToken) => {
+  // Set HTTP-only cookies for tokens
+  res.cookie('sessionToken', token, {
+    httpOnly: true,    // Prevents XSS from stealing the token
+    secure: process.env.NODE_ENV === 'production',  // Only sent over HTTPS in production
+    sameSite: 'lax',  // Prevents CSRF
+    path: '/',
+    maxAge: 15 * 60 * 1000 // 15 minutes for access token
+  });
+  
+  res.cookie('refreshToken', refreshToken, {
+    httpOnly: true,    // Prevents XSS from stealing the token
+    secure: process.env.NODE_ENV === 'production',  // Only sent over HTTPS in production
+    sameSite: 'lax',  // Prevents CSRF
+    path: '/',
+    maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days for refresh token
+  });
+};
+
+// Helper function to clear cookies
+const clearAuthCookies = (res) => {
+  res.clearCookie('sessionToken', { path: '/' });
+  res.clearCookie('refreshToken', { path: '/' });
+};
+
 // @route   PUT api/auth/profile
 // @desc    Update user profile
 // @access  Private
@@ -264,6 +321,33 @@ router.put('/profile', auth, async (req, res) => {
     });
 
     res.json(updatedUser);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send('Server error');
+  }
+});
+
+// @route   POST api/auth/logout
+// @desc    Logout user
+// @access  Private
+router.post('/logout', auth, async (req, res) => {
+  try {
+    // Clear authentication cookies
+    clearAuthCookies(res);
+    
+    // Log logout
+    const auditService = require('../services/security/auditService');
+    await auditService.logAction(
+      req.user.id,
+      'LOGOUT',
+      'USER',
+      req.user.id,
+      null,
+      null,
+      req
+    );
+    
+    res.json({ msg: 'Logout successful' });
   } catch (err) {
     console.error(err.message);
     res.status(500).send('Server error');

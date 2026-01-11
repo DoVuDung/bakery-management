@@ -2,6 +2,18 @@
 
 A comprehensive full-stack web application for a Vietnamese bakery with integrated local payment gateways, shipping services, and admin management.
 
+## UI/UX Framework
+
+This system uses shadcn/ui components for a professional, accessible interface with customizable styling. The UI follows Vietnamese market preferences with warm tones (Cream, Soft Terracotta, and Sage Green) and mobile-first design.
+
+### Key UI Components:
+- **Navigation**: NavigationMenu for product categories
+- **Product Display**: Card components for items with pricing
+- **Authentication**: Tabs for login/signup flows
+- **Data Management**: DataTable with filtering for inventory
+- **Staff Management**: Avatar components for employee photos
+- **Interactive Elements**: Badges, Alerts, Sheets, and Dialogs for rich interactions
+
 ## Features
 
 ### 🏪 Customer Storefront

@@ -1,6 +1,7 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
+const cookieParser = require('cookie-parser');
 
 // Import security middleware
 const {
@@ -10,6 +11,9 @@ const {
   sensitiveEndpointsLimiter,
   scanLimiter
 } = require('./middleware/security/sessionSecurity');
+
+// Import additional security configuration
+const { rateLimiters, securityMiddleware, addSecurityHeaders } = require('./config/security');
 
 // Import routes
 const authRoutes = require('./routes/auth');
@@ -24,21 +28,25 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 // Security middleware
+app.use(securityMiddleware.compression);
+app.use(securityMiddleware.helmet);
+app.use(securityMiddleware.cors);
+app.use(addSecurityHeaders);
 app.use(securityHeaders);
 app.use(sessionSecurity);
 
-// Global rate limiting
-const globalLimiter = require('express-rate-limit')({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // limit each IP to 100 requests per windowMs
-  message: {
-    error: 'Too many requests from this IP, please try again later.',
-    code: 'GLOBAL_RATE_LIMIT_EXCEEDED'
-  },
-  standardHeaders: true,
-  legacyHeaders: false,
-});
-app.use(globalLimiter);
+// Apply rate limiting for different routes
+app.use('/api/auth', rateLimiters.auth);
+app.use('/api/products', rateLimiters.api);
+app.use('/api/orders', rateLimiters.api);
+app.use('/api/payments', rateLimiters.api);
+app.use('/api/shipping', rateLimiters.api);
+app.use('/api/vouchers', rateLimiters.api);
+app.use('/api/users', rateLimiters.api);
+app.use('/api/inventory', rateLimiters.api);
+
+// General API rate limiting
+app.use(rateLimiters.api);
 
 // CORS configuration for Vietnamese market
 app.use(cors({
@@ -55,6 +63,7 @@ app.use(cors({
 // Body parsing middleware
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
 
 // Apply specific rate limiting to sensitive endpoints
 app.use('/api/auth/login', loginLimiter);

@@ -78,6 +78,17 @@ const sessionSecurity = (req, res, next) => {
     res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains; preload');
   }
   
+  // Strip potential malicious headers to prevent token injection
+  delete req.headers['x-middleware-subrequest'];
+  
+  // Additional security check for suspicious headers
+  if (req.headers['x-middleware-subrequest']) {
+    return res.status(400).json({
+      error: 'Invalid request header - potential security threat',
+      code: 'SECURITY_HEADER_VIOLATION'
+    });
+  }
+  
   next();
 };
 

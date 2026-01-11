@@ -2,6 +2,8 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '../ui/Button';
 import { Badge } from '../ui/Badge';
+import { NavigationMenu, NavigationMenuItem, NavigationMenuLink, NavigationMenuList } from '../ui/navigation-menu';
+import LoginSignupModal from './LoginSignupModal';
 
 const Header = ({ cartItemCount = 0 }) => {
   const { t } = useTranslation();
@@ -19,20 +21,30 @@ const Header = ({ cartItemCount = 0 }) => {
           </div>
 
           {/* Navigation */}
-          <nav className="hidden md:flex space-x-8">
-            <a href="/" className="text-gray-700 hover:text-amber-600 font-medium transition-colors">
-              {t('products')}
-            </a>
-            <a href="/custom-cakes" className="text-gray-700 hover:text-amber-600 font-medium transition-colors">
-              {t('categories')}: Bánh Sinh Nhật
-            </a>
-            <a href="/tracking" className="text-gray-700 hover:text-amber-600 font-medium transition-colors">
-              {t('orders')}: Theo Dõi
-            </a>
-            <a href="/profile" className="text-gray-700 hover:text-amber-600 font-medium transition-colors">
-              {t('profile')}
-            </a>
-          </nav>
+          <NavigationMenu className="hidden md:block">
+            <NavigationMenuList className="space-x-8">
+              <NavigationMenuItem>
+                <NavigationMenuLink href="/" className="text-gray-700 hover:text-amber-600 font-medium transition-colors">
+                  {t('products')}
+                </NavigationMenuLink>
+              </NavigationMenuItem>
+              <NavigationMenuItem>
+                <NavigationMenuLink href="/custom-cakes" className="text-gray-700 hover:text-amber-600 font-medium transition-colors">
+                  {t('categories')}: Bánh Sinh Nhật
+                </NavigationMenuLink>
+              </NavigationMenuItem>
+              <NavigationMenuItem>
+                <NavigationMenuLink href="/tracking" className="text-gray-700 hover:text-amber-600 font-medium transition-colors">
+                  {t('orders')}: Theo Dõi
+                </NavigationMenuLink>
+              </NavigationMenuItem>
+              <NavigationMenuItem>
+                <NavigationMenuLink href="/profile" className="text-gray-700 hover:text-amber-600 font-medium transition-colors">
+                  {t('profile')}
+                </NavigationMenuLink>
+              </NavigationMenuItem>
+            </NavigationMenuList>
+          </NavigationMenu>
 
           {/* Cart and Actions */}
           <div className="flex items-center space-x-4">
@@ -47,9 +59,7 @@ const Header = ({ cartItemCount = 0 }) => {
               )}
             </Button>
             
-            <Button className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white">
-              {t('login')}
-            </Button>
+            <LoginSignupModal />
           </div>
         </div>
 

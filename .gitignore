@@ -1,0 +1,163 @@
+# Dependencies
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Database
+*.sqlite
+*.db
+*.db-journal
+
+# Build outputs
+/dist
+/build
+/out
+/.next
+.next
+.nuxt
+/public/build
+/.cache
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Coverage directory used by tools like istanbul
+coverage/
+*.lcov
+
+# Temporary folders
+tmp/
+temp/
+
+# Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Compiled files
+*.exe
+*.dll
+*.so
+*.dylib
+
+# Backend specific
+/backend/node_modules
+/backend/.env
+/backend/logs
+/backend/dist
+/backend/build
+
+# Frontend specific
+/frontend/node_modules
+/frontend/.env
+/frontend/dist
+/frontend/build
+/frontend/public/uploads
+/frontend/.vite
+/frontend/.cache
+
+# Prisma
+/prisma/migrations
+!/prisma/schema.prisma
+
+# IDE
+.vs/
+*.vsix
+.settings/
+.project
+
+# Testing
+/coverage
+/nyc-output
+.jest/
+
+# Security
+/secrets/
+/keys/
+/certs/
+/private.pem
+/public.pem
+/key.pem
+/cert.pem
+
+# Cache
+.cache/
+.nyc_output/
+coverage/
+
+# Lock files (if not needed)
+.yarnrc
+.yarn/
+
+# Local development
+.local/
+*.local
+config.local.*
+
+# Temporary files
+*.tmp
+*.temp
+tmp/
+temp/
+
+# macOS
+*.DS_Store
+.AppleDouble
+.LSOverride
+Icon?
+*/
+
+# Windows
+Thumbs.db
+ehthumbs.db
+[Dd]esktop.ini
+
+# Linux
+*~
+
+# TypeScript
+*.tsbuildinfo
+*.js.map
+*.jsx.map
+*.ts.map
+*.tsx.map
+
+# Backend logs
+logs/
+*.log
+
+# Uploads/temporary files
+uploads/
+temp/
+tmp/
+
+# Backend dist/build
+backend/dist/
+backend/build/
+
+# Frontend dist/build
+frontend/dist/
+frontend/build/

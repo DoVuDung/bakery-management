@@ -4,6 +4,10 @@ import Sidebar from '../../components/admin/Sidebar';
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
 import { Badge } from '../../components/ui/Badge';
+import { DataTable } from '../../components/ui/data-table';
+import { Avatar, AvatarImage, AvatarFallback } from '../../components/ui/avatar';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../../components/ui/accordion';
+import { Alert, AlertDescription } from '../../components/ui/alert';
 
 const InventoryPage = () => {
   const { t } = useTranslation();
@@ -195,49 +199,43 @@ const InventoryPage = () => {
                 </div>
               </CardHeader>
               <CardContent>
-                <div className="overflow-x-auto">
-                  <table className="w-full">
-                    <thead>
-                      <tr className="border-b">
-                        <th className="text-left py-3 px-2">Tên nguyên liệu</th>
-                        <th className="text-left py-3 px-2">Tồn kho</th>
-                        <th className="text-left py-3 px-2">Mức tối thiểu</th>
-                        <th className="text-left py-3 px-2">Tiến độ</th>
-                        <th className="text-left py-3 px-2">Đơn giá</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {ingredients.map(item => (
-                        <tr key={item.id} className="border-b hover:bg-gray-50">
-                          <td className="py-3 px-2">
-                            <div className="font-medium">{item.name}</div>
-                            <div className="text-sm text-gray-500">{item.supplier}</div>
-                          </td>
-                          <td className="py-3 px-2">
-                            <div className="font-semibold">{item.currentStock} {item.unit}</div>
-                          </td>
-                          <td className="py-3 px-2">
-                            <div className="text-gray-700">{item.minStock} {item.unit}</div>
-                          </td>
-                          <td className="py-3 px-2 w-32">
-                            <div className="w-full bg-gray-200 rounded-full h-2">
-                              <div 
-                                className={`h-2 rounded-full ${getStockLevelColor(item.currentStock, item.minStock)}`}
-                                style={{ width: getStockLevelWidth(item.currentStock, item.minStock) }}
-                              ></div>
-                            </div>
-                            <div className="text-xs text-gray-500 mt-1">
-                              {item.currentStock < item.minStock ? 'Thấp' : 'Đủ'}
-                            </div>
-                          </td>
-                          <td className="py-3 px-2">
-                            <div className="font-medium">{item.costPerUnit.toLocaleString('vi-VN')} ₫/{item.unit}</div>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
+                <DataTable 
+                  columns={[
+                    { id: 'name', header: 'Tên nguyên liệu', cell: ({ row }) => (
+                      <div>
+                        <div className="font-medium">{row.name}</div>
+                        <div className="text-sm text-gray-500">{row.supplier}</div>
+                      </div>
+                    )},
+                    { id: 'currentStock', header: 'Tồn kho', cell: ({ row }) => (
+                      <div className="font-semibold">{row.currentStock} {row.unit}</div>
+                    )},
+                    { id: 'minStock', header: 'Mức tối thiểu', cell: ({ row }) => (
+                      <div className="text-gray-700">{row.minStock} {row.unit}</div>
+                    )},
+                    { id: 'stockProgress', header: 'Tiến độ', cell: ({ row }) => (
+                      <div className="w-32">
+                        <div className="w-full bg-gray-200 rounded-full h-2">
+                          <div 
+                            className={`h-2 rounded-full ${getStockLevelColor(row.currentStock, row.minStock)}`}
+                            style={{ width: getStockLevelWidth(row.currentStock, row.minStock) }}
+                          ></div>
+                        </div>
+                        <div className="text-xs text-gray-500 mt-1">
+                          {row.currentStock < row.minStock ? 'Thấp' : 'Đủ'}
+                        </div>
+                      </div>
+                    )},
+                    { id: 'costPerUnit', header: 'Đơn giá', cell: ({ row }) => (
+                      <div className="font-medium">{row.costPerUnit.toLocaleString('vi-VN')} ₫/{row.unit}</div>
+                    )}
+                  ]}
+                  data={ingredients}
+                  filterOptions={[
+                    { id: 'name', placeholder: 'Lọc theo tên...' },
+                    { id: 'unit', placeholder: 'Lọc theo đơn vị...' }
+                  ]}
+                />
               </CardContent>
             </Card>
 
@@ -250,52 +248,43 @@ const InventoryPage = () => {
                 </div>
               </CardHeader>
               <CardContent>
-                <div className="overflow-x-auto">
-                  <table className="w-full">
-                    <thead>
-                      <tr className="border-b">
-                        <th className="text-left py-3 px-2">Nhân viên</th>
-                        <th className="text-left py-3 px-2">Vị trí</th>
-                        <th className="text-left py-3 px-2">Lương tháng</th>
-                        <th className="text-left py-3 px-2">Ngày vào</th>
-                        <th className="text-left py-3 px-2">Trạng thái</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {staff.map(person => (
-                        <tr key={person.id} className="border-b hover:bg-gray-50">
-                          <td className="py-3 px-2">
-                            <div className="flex items-center">
-                              <div className="w-10 h-10 rounded-full bg-gray-300 mr-3 flex items-center justify-center">
-                                <span className="font-medium text-gray-700">
-                                  {person.name.split(' ').map(n => n[0]).join('')}
-                                </span>
-                              </div>
-                              <div>
-                                <div className="font-medium">{person.name}</div>
-                                <div className="text-sm text-gray-500">ID: NV{person.id.toString().padStart(3, '0')}</div>
-                              </div>
-                            </div>
-                          </td>
-                          <td className="py-3 px-2">
-                            <div className="font-medium">{person.role}</div>
-                          </td>
-                          <td className="py-3 px-2">
-                            <div className="font-semibold">{person.monthlySalary.toLocaleString('vi-VN')} ₫</div>
-                          </td>
-                          <td className="py-3 px-2">
-                            <div className="text-gray-700">{new Date(person.hireDate).toLocaleDateString('vi-VN')}</div>
-                          </td>
-                          <td className="py-3 px-2">
-                            <Badge variant={person.status === 'active' ? 'success' : 'secondary'}>
-                              {person.status === 'active' ? 'Hoạt động' : 'Không hoạt động'}
-                            </Badge>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
+                <DataTable 
+                  columns={[
+                    { id: 'employee', header: 'Nhân viên', cell: ({ row }) => (
+                      <div className="flex items-center">
+                        <Avatar className="h-10 w-10 mr-3">
+                          <AvatarImage src={row.avatar} alt={row.name} />
+                          <AvatarFallback>
+                            {row.name.split(' ').map(n => n[0]).join('')}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <div className="font-medium">{row.name}</div>
+                          <div className="text-sm text-gray-500">ID: NV{row.id.toString().padStart(3, '0')}</div>
+                        </div>
+                      </div>
+                    )},
+                    { id: 'role', header: 'Vị trí', cell: ({ row }) => (
+                      <div className="font-medium">{row.role}</div>
+                    )},
+                    { id: 'monthlySalary', header: 'Lương tháng', cell: ({ row }) => (
+                      <div className="font-semibold">{row.monthlySalary.toLocaleString('vi-VN')} ₫</div>
+                    )},
+                    { id: 'hireDate', header: 'Ngày vào', cell: ({ row }) => (
+                      <div className="text-gray-700">{new Date(row.hireDate).toLocaleDateString('vi-VN')}</div>
+                    )},
+                    { id: 'status', header: 'Trạng thái', cell: ({ row }) => (
+                      <Badge variant={row.status === 'active' ? 'success' : 'secondary'}>
+                        {row.status === 'active' ? 'Hoạt động' : 'Không hoạt động'}
+                      </Badge>
+                    )}
+                  ]}
+                  data={staff}
+                  filterOptions={[
+                    { id: 'name', placeholder: 'Lọc theo tên...' },
+                    { id: 'role', placeholder: 'Lọc theo vị trí...' }
+                  ]}
+                />
 
                 {/* Payment & Ads Status */}
                 <div className="mt-6 pt-4 border-t">
