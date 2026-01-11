@@ -1,0 +1,61 @@
+{
+  "welcome": "Welcome to Bánh Ngọt Pro",
+  "login": "Login",
+  "register": "Register",
+  "logout": "Logout",
+  "cart": "Cart",
+  "checkout": "Checkout",
+  "products": "Products",
+  "categories": "Categories",
+  "search": "Search",
+  "profile": "Profile",
+  "admin_panel": "Admin Panel",
+  "orders": "Orders",
+  "inventory": "Inventory",
+  "finance": "Finance",
+  "settings": "Settings",
+  "dashboard": "Dashboard",
+  "new_order": "New Order",
+  "processing": "Processing",
+  "cooking": "Cooking",
+  "completed": "Completed",
+  "delivered": "Delivered",
+  "order_status": {
+    "new": "New Order",
+    "processing": "Processing",
+    "cooking": "Cooking",
+    "completed": "Completed",
+    "delivered": "Delivered"
+  },
+  "payment_methods": {
+    "cod": "Cash on Delivery (COD)",
+    "vnpay": "VNPay",
+    "momo": "MoMo",
+    "zalopay": "ZaloPay"
+  },
+  "shipping_methods": {
+    "standard": "Standard Shipping",
+    "express": "Express Shipping",
+    "grabexpress": "GrabExpress",
+    "ahamove": "Ahamove"
+  },
+  "product": {
+    "name": "Product Name",
+    "price": "Price",
+    "description": "Description",
+    "quantity": "Quantity",
+    "add_to_cart": "Add to Cart",
+    "out_of_stock": "Out of Stock"
+  },
+  "voucher": {
+    "apply": "Apply Voucher",
+    "enter_code": "Enter Voucher Code",
+    "discount": "Discount"
+  },
+  "notification": {
+    "success": "Success",
+    "error": "Error",
+    "warning": "Warning",
+    "info": "Info"
+  }
+}

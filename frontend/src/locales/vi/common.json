@@ -1,0 +1,61 @@
+{
+  "welcome": "Chào mừng đến với Bánh Ngọt Pro",
+  "login": "Đăng nhập",
+  "register": "Đăng ký",
+  "logout": "Đăng xuất",
+  "cart": "Giỏ hàng",
+  "checkout": "Thanh toán",
+  "products": "Sản phẩm",
+  "categories": "Danh mục",
+  "search": "Tìm kiếm",
+  "profile": "Hồ sơ",
+  "admin_panel": "Bảng điều khiển quản trị",
+  "orders": "Đơn hàng",
+  "inventory": "Kho",
+  "finance": "Tài chính",
+  "settings": "Cài đặt",
+  "dashboard": "Bảng điều khiển",
+  "new_order": "Đơn mới",
+  "processing": "Đang xử lý",
+  "cooking": "Đang nướng",
+  "completed": "Hoàn thành",
+  "delivered": "Đã giao",
+  "order_status": {
+    "new": "Đơn Mới",
+    "processing": "Đang Làm",
+    "cooking": "Đang Nướng",
+    "completed": "Hoàn Thành",
+    "delivered": "Đã Giao"
+  },
+  "payment_methods": {
+    "cod": "Thanh toán khi nhận hàng (COD)",
+    "vnpay": "VNPay",
+    "momo": "MoMo",
+    "zalopay": "ZaloPay"
+  },
+  "shipping_methods": {
+    "standard": "Giao hàng tiêu chuẩn",
+    "express": "Giao hàng nhanh",
+    "grabexpress": "GrabExpress",
+    "ahamove": "Ahamove"
+  },
+  "product": {
+    "name": "Tên sản phẩm",
+    "price": "Giá",
+    "description": "Mô tả",
+    "quantity": "Số lượng",
+    "add_to_cart": "Thêm vào giỏ hàng",
+    "out_of_stock": "Hết hàng"
+  },
+  "voucher": {
+    "apply": "Áp dụng mã giảm giá",
+    "enter_code": "Nhập mã giảm giá",
+    "discount": "Giảm giá"
+  },
+  "notification": {
+    "success": "Thành công",
+    "error": "Lỗi",
+    "warning": "Cảnh báo",
+    "info": "Thông tin"
+  }
+}

@@ -1,0 +1,400 @@
+// Schema for Bánh Ngọt Pro - Vietnamese Bakery System
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id          String   @id @default(uuid())
+  phoneNumber String   @unique
+  email       String?  @unique
+  fullName    String
+  password    String?
+  avatar      String?
+  role        UserRole @default(CUSTOMER)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  // MFA fields
+  mfaEnabled  Boolean  @default(false)
+  mfaMethod   String?  // TOTP, SMS, ZALO
+  mfaSecret   String?  // Encrypted TOTP secret
+  
+  // Social logins
+  zaloId      String?
+  facebookId  String?
+  
+  // Relationships
+  orders      Order[]
+  addresses   Address[]
+  cartItems   CartItem[]
+  otps        OTP[]
+  backupCodes BackupCode[]
+  auditLogs   AuditLog[]
+}
+
+model Address {
+  id         String @id @default(uuid())
+  userId     String
+  recipient  String
+  phone      String
+  street     String
+  ward       String
+  district   String
+  city       String
+  isDefault  Boolean @default(false)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  
+  user       User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+enum UserRole {
+  CUSTOMER
+  STAFF
+  MANAGER
+  ADMIN
+}
+
+model Category {
+  id          String    @id @default(uuid())
+  name        String
+  description String?
+  image       String?
+  isActive    Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  
+  products    Product[]
+}
+
+model Product {
+  id            String     @id @default(uuid())
+  name          String
+  slug          String     @unique
+  description   String
+  price         Float
+  costPrice     Float      // For inventory tracking
+  image         String?
+  images        Json?      // Array of image URLs
+  categoryId    String
+  stockQuantity Int        @default(0)
+  minStock      Int        @default(5)  // Low stock alert threshold
+  isActive      Boolean    @default(true)
+  isFeatured    Boolean    @default(false)
+  nutritionalInfo Json?    // Nutritional information
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+  
+  category      Category   @relation(fields: [categoryId], references: [id])
+  orderItems    OrderItem[]
+  cartItems     CartItem[]
+}
+
+model Ingredient {
+  id            String   @id @default(uuid())
+  name          String   // e.g., "Bột mì", "Đường", "Bơ"
+  unit          String   // e.g., "kg", "g", "ml", "cái"
+  quantity      Float    @default(0.0)
+  minQuantity   Float    @default(1.0)  // Low stock alert threshold
+  costPerUnit   Float    // Cost per unit for inventory tracking
+  supplier      String?  // Supplier information
+  notes         String?
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  
+  productIngredients ProductIngredient[]
+  inventoryLogs InventoryLog[]
+}
+
+model ProductIngredient {
+  id           String   @id @default(uuid())
+  productId    String
+  ingredientId String
+  quantity     Float    // Quantity of ingredient required for the product
+  
+  product    Product    @relation(fields: [productId], references: [id], onDelete: Cascade)
+  ingredient Ingredient @relation(fields: [ingredientId], references: [id], onDelete: Cascade)
+  
+  @@unique([productId, ingredientId])
+}
+
+model InventoryLog {
+  id           String   @id @default(uuid())
+  ingredientId String
+  type         InventoryLogType // IN, OUT, ADJUSTMENT
+  quantity     Float
+  reason       String   // Reason for the inventory change
+  referenceId  String?  // Reference to order, production batch, etc.
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  
+  ingredient   Ingredient @relation(fields: [ingredientId], references: [id])
+}
+
+enum InventoryLogType {
+  IN        // Stock in (purchase, return, etc.)
+  OUT       // Stock out (used in production, sold, waste, etc.)
+  ADJUSTMENT // Manual adjustment
+}
+
+model CartItem {
+  id        String @id @default(uuid())
+  userId    String
+  productId String
+  quantity  Int    @default(1)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  
+  @@unique([userId, productId])
+}
+
+enum OrderStatus {
+  NEW        // Đơn Mới
+  PROCESSING // Đang Làm
+  COOKING    // Đang Nướng
+  COMPLETED  // Hoàn Thành
+  DELIVERED  // Đã Giao
+  CANCELLED
+  REFUNDED
+}
+
+enum PaymentMethod {
+  COD       // Cash on Delivery
+  VNPAY
+  MOMO
+  ZALOPAY
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
+  REFUNDED
+}
+
+enum ShippingMethod {
+  STANDARD
+  EXPRESS
+  GRABEXPRESS
+  AHAMOVE
+}
+
+enum ShippingStatus {
+  PENDING
+  PICKED_UP
+  IN_TRANSIT
+  DELIVERED
+  RETURNED
+}
+
+model Order {
+  id              String         @id @default(uuid())
+  orderId         String         @unique // Custom order ID (e.g., BN20230101001)
+  userId          String
+  status          OrderStatus    @default(NEW)
+  paymentMethod   PaymentMethod?
+  paymentStatus   PaymentStatus  @default(PENDING)
+  shippingMethod  ShippingMethod?
+  shippingStatus  ShippingStatus @default(PENDING)
+  subtotal        Float
+  discountAmount  Float          @default(0)
+  shippingFee     Float          @default(0)
+  taxAmount       Float          @default(0)
+  totalAmount     Float
+  currency        String         @default("VND")
+  notes           String?
+  customerNotes   String?        // Notes from customer
+  internalNotes   String?        // Internal notes for kitchen/staff
+  
+  // Shipping address (copied from user's address at order time)
+  shippingRecipient String
+  shippingPhone   String
+  shippingStreet  String
+  shippingWard    String
+  shippingDistrict String
+  shippingCity    String
+  
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+  shippedAt       DateTime?
+  deliveredAt     DateTime?
+  estimatedDelivery DateTime?
+  
+  user        User        @relation(fields: [userId], references: [id])
+  orderItems  OrderItem[]
+  payments    Payment[]
+  shipping    Shipping?
+}
+
+model OrderItem {
+  id         String  @id @default(uuid())
+  orderId    String
+  productId  String
+  productName String  // Copy of product name at order time
+  price      Float   // Price at order time
+  quantity   Int
+  note       String? // Special instructions for this item
+  
+  order   Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id], onDelete: Restrict)
+}
+
+model Payment {
+  id              String        @id @default(uuid())
+  orderId         String
+  paymentMethod   PaymentMethod
+  amount          Float
+  transactionId   String?       // Transaction ID from payment gateway
+  referenceNumber String?       // Reference number from payment gateway
+  status          PaymentStatus @default(PENDING)
+  gatewayData     Json?         // Raw data from payment gateway
+  paidAt          DateTime?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  
+  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+}
+
+model Shipping {
+  id              String         @id @default(uuid())
+  orderId         String         @unique
+  shippingMethod  ShippingMethod
+  trackingNumber  String?
+  carrier         String?        // Carrier name (Grab, Ahamove, etc.)
+  fee             Float
+  status          ShippingStatus @default(PENDING)
+  estimatedDelivery DateTime?
+  shippedAt       DateTime?
+  deliveredAt     DateTime?
+  address         Json           // Shipping address
+  shippingData    Json?          // Raw data from shipping API
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+  
+  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+}
+
+model Voucher {
+  id            String      @id @default(uuid())
+  code          String      @unique  // e.g., "MUAMOT_TANGMOT"
+  name          String      // Descriptive name
+  description   String?
+  type          VoucherType @default(PERCENTAGE)
+  value         Float       // Discount value (percentage or fixed amount)
+  minOrderValue Float?      // Minimum order value to apply voucher
+  maxDiscount   Float?      // Maximum discount amount (for percentage vouchers)
+  usageLimit    Int?        // Total usage limit
+  usedCount     Int         @default(0)  // How many times it has been used
+  isActive      Boolean     @default(true)
+  startDate     DateTime?
+  endDate       DateTime?
+  applicableProducts String[] @default([])  // Specific product IDs this voucher applies to (empty means all products)
+  applicableCategories String[] @default([])  // Specific category IDs this voucher applies to (empty means all categories)
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  
+  orderVouchers OrderVoucher[]
+}
+
+enum VoucherType {
+  PERCENTAGE  // Giảm giá theo phần trăm
+  FIXED_AMOUNT // Giảm giá theo số tiền cố định
+  BUY_X_GET_Y // Mua X tặng Y (BOGO)
+}
+
+model OrderVoucher {
+  id        String @id @default(uuid())
+  orderId   String
+  voucherId String
+  code      String  // Copy of voucher code at order time
+  discount  Float   // Actual discount applied
+  
+  order   Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  voucher Voucher @relation(fields: [voucherId], references: [id], onDelete: Cascade)
+  
+  @@unique([orderId, voucherId])
+}
+
+model Staff {
+  id           String   @id @default(uuid())
+  userId       String   @unique
+  employeeId   String   @unique  // Employee ID
+  position     String   // Position title
+  department   String   // Department
+  salary       Float?   // Monthly salary
+  hireDate     DateTime
+  endDate      DateTime? // End date if terminated
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model SalaryRecord {
+  id         String   @id @default(uuid())
+  staffId    String
+  month      Int      // Month (1-12)
+  year       Int      // Year (e.g., 2023)
+  baseSalary Float
+  allowance  Float    @default(0)
+  bonus      Float    @default(0)
+  deduction  Float    @default(0)
+  totalSalary Float   // Calculated total
+  paidAt     DateTime?
+  isPaid     Boolean  @default(false)
+  notes      String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  
+  staff Staff @relation(fields: [staffId], references: [id], onDelete: Cascade)
+  
+  @@unique([staffId, month, year])
+}
+
+model OTP {
+  id        String   @id @default(uuid())
+  userId    String
+  otp       String   // This should be encrypted at application level
+  channel   String   // SMS, EMAIL, ZALO
+  expiresAt DateTime
+  used      Boolean  @default(false)
+  createdAt DateTime @default(now())
+  
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model BackupCode {
+  id        String   @id @default(uuid())
+  userId    String
+  code      String   // This should be encrypted at application level
+  used      Boolean  @default(false)
+  createdAt DateTime @default(now())
+  
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model AuditLog {
+  id          String   @id @default(uuid())
+  userId      String?
+  action      String   // CREATE, UPDATE, DELETE, VIEW, etc.
+  resource    String   // The resource being accessed (user, order, inventory, etc.)
+  resourceId  String?  // The ID of the specific resource
+  oldValue    Json?    // Previous state of the resource (for updates)
+  newValue    Json?    // New state of the resource (for updates)
+  ipAddress   String?
+  userAgent   String?
+  timestamp   DateTime @default(now())
+  
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+}
